@@ -6,13 +6,37 @@ import telebot
 TOKEN = os.environ.get("TOKEN", "8666501249:AAH1esd_1_Pp2N2N1CLwfMnu3Jh0EO89mzA")
 bot = telebot.TeleBot(TOKEN)
 
+# Словарь для отслеживания текущей игры в чатах
 active_games = {}
 game_lock = threading.Lock()
 
-# Картинка с тортиком для финала
+# Картинка с тортиком для финала игры
 IMAGE_URL = "https://i.pinimg.com/736x/52/3b/7a/523b7ab4a5bb49f27b6eed81b32c7b89.jpg"
 
 
+# 1. Обработчик команды /start в личных сообщениях
+@bot.message_handler(commands=["start"], chat_types=["private"])
+def send_welcome(message):
+  user = message.from_user
+
+  if user.username:
+    mention = f"@{user.username}"
+  else:
+    mention = f"[{user.first_name}](tg://user?id={user.id})"
+
+  # Точный текст приветствия, который вы указали
+  welcome_text = (
+      f"Привет, {mention}! Я очень рад видеть тебя в этом боте 💜\n\n"
+      f"🎁 Ты можешь получить бесплатного мишку тут: https://t.me/bobrnft1"
+  )
+
+  try:
+    bot.reply_to(message, welcome_text, parse_mode="Markdown")
+  except Exception:
+    bot.send_message(message.chat.id, welcome_text, parse_mode="Markdown")
+
+
+# 2. Обработчик игровой активности в ГРУППАХ («Царь горы»)
 @bot.message_handler(
     func=lambda message: message.chat.type in ["group", "supergroup"],
     content_types=["text", "photo", "sticker", "voice"],
@@ -91,7 +115,7 @@ app = Flask("")
 
 @app.route("/")
 def home():
-  return "King of the Hill Bot is alive!"
+  return "Bot is alive!"
 
 
 def run_bot():
