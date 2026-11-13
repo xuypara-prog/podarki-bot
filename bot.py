@@ -64,7 +64,7 @@ def handle_chat_activity(message):
     timer.start()
 
   text = (
-      f"*{mention}*, ты первый на очереди что бы получить тортик🎂 Осталось"
+      f"*{mention}*, ты первый на очереди что бы получить подарок🎂 Осталось"
       f" продерждатся 2 минуты без перебивов!🤯❤️\n\nудачи💕"
   )
   bot.send_message(chat_id, text, parse_mode="Markdown")
