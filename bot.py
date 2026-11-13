@@ -13,6 +13,29 @@ game_lock = threading.Lock()
 IMAGE_URL = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe"
 
 
+# 1. Обработчик команды /start (работает и в личных сообщениях, и в чатах)
+@bot.message_handler(commands=["start"])
+def send_welcome(message):
+  user = message.from_user
+
+  # Красивое упоминание пользователя (если есть юзернейм, то через @, если нет — кликабельное имя)
+  if user.username:
+    mention = f"@{user.username}"
+  else:
+    mention = f"[{user.first_name}](tg://user?id={user.id})"
+
+  welcome_text = (
+      f"Привет, {mention}! Я очень рад видеть тебя в этом боте 💜\n\n"
+      f"🎁 Ты можешь получить бесплатного мишку тут: https://t.me/bobrnft1"
+  )
+
+  try:
+    bot.reply_to(message, welcome_text, parse_mode="Markdown")
+  except Exception:
+    bot.send_message(message.chat.id, welcome_text, parse_mode="Markdown")
+
+
+# 2. Обработчик игровой активности в группах (игра «Царь горы»)
 @bot.message_handler(
     func=lambda message: message.chat.type in ["group", "supergroup"],
     content_types=["text", "photo", "sticker", "voice"],
@@ -52,7 +75,7 @@ def handle_chat_activity(message):
     active_games[chat_id] = game_data
     timer.start()
 
-  # Текст уведомления с вашими смайликами
+  # Текст уведомления про тортик со смайликами
   text = (
       f"*{mention}*, ты первый на очереди что бы получить тортик🎂 Осталось"
       f" продерждатся 2 минуты без перебивов!🤯❤️\n\nудачи💕"
