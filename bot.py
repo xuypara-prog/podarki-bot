@@ -9,6 +9,7 @@ bot = telebot.TeleBot(TOKEN, threaded=True)
 active_games = {}
 game_lock = threading.Lock()
 
+# Картинка с подарком/тортиком
 IMAGE_URL = "https://i.pinimg.com/736x/52/3b/7a/523b7ab4a5bb49f27b6eed81b32c7b89.jpg"
 
 
@@ -29,7 +30,7 @@ def send_welcome(message):
   bot.send_message(message.chat.id, welcome_text, parse_mode="Markdown")
 
 
-# 2. Игра «Царь горы» в группах
+# 2. Игра «Самый большой карман» в группах
 @bot.message_handler(
     func=lambda message: message.chat.type in ["group", "supergroup"],
     content_types=["text", "photo", "sticker", "voice"],
@@ -64,8 +65,8 @@ def handle_chat_activity(message):
     timer.start()
 
   text = (
-      f"*{mention}*, ты первый на очереди что бы получить подарок🎂 Осталось"
-      f" продерждатся 2 минуты без перебивов!🤯❤️\n\nудачи💕"
+      f"*{mention}*, у тебя самый большой карман🎂 Осталось продержаться 2"
+      f" минуты без перебивов!🤯❤️\n\nудачи💕"
   )
   bot.send_message(chat_id, text, parse_mode="Markdown")
 
@@ -73,13 +74,14 @@ def handle_chat_activity(message):
 def finish_game(chat_id, user_id):
   with game_lock:
     if chat_id in active_games and active_games[chat_id]["user_id"] == user_id:
-      active_games.pop(chat_id)
-      winner = game_id_name = active_games.get(chat_id, {}).get("name", "Игрок")
+      game_data = active_games.pop(chat_id)
+      winner_mention = game_data["name"]
 
       caption_text = (
-          f"💜 **Поздравляю!**\n🏆 Ты продержался 2 минуты без перебивов и"
-          f" победил в игре «Самый Большой Карман в этом Чате»!\n\n‼️ Пиши сообщения в чате, чтобы"
-          f" запустить новую игру!"
+          f"💜 **Поздравляю, {winner_mention}!**\n"
+          f"🎁 Ты продержался 2 минуты без перебивов и забрал подарок в игре"
+          f" «Самый большой карман»!🎂\n\n‼️ Пиши сообщения в чате, чтобы залутать"
+          f" новые подарки!"
       )
       try:
         bot.send_photo(
@@ -102,7 +104,6 @@ def home():
 
 
 def run_bot():
-  # Запуск поллинга с автовосстановлением при обрывах связи
   while True:
     try:
       bot.infinity_polling(none_stop=True, interval=0, timeout=20)
