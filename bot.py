@@ -6,34 +6,9 @@ import telebot
 TOKEN = os.environ.get("TOKEN", "8666501249:AAH1esd_1_Pp2N2N1CLwfMnu3Jh0EO89mzA")
 bot = telebot.TeleBot(TOKEN)
 
-# Словарь для отслеживания текущей игры в чатах
 active_games = {}
 game_lock = threading.Lock()
 
-# 🦫 Картинка победителя (бобр с бриллиантами)
-IMAGE_URL = 'https://i.pinimg.com/736x/ef/c5/09/efc509195fd6fdb6180c7c2a00ad02ee.jpg'
-
-
-# 1. Обработчик команды /start в личных сообщениях
-@bot.message_handler(commands=['start'], chat_types=['private'])
-def send_welcome(message):
-    user = message.from_user
-
-    if user.username:
-        mention = f"@{user.username}"
-    else:
-        mention = f"[{user.first_name}](tg://user?id={user.id})"
-
-    welcome_text = (
-        f"Привет, {mention}! Я очень рад видеть тебя в этом боте 💜\n\n"
-        f"🎁 Ты можешь получить бесплатного мишку тут: https://t.me/bobrnft1"
-    )
-
-    try:
-        bot.reply_to(message, welcome_text, parse_mode="Markdown")
-    except Exception:
-        bot.send_message(message.chat.id, welcome_text, parse_mode="Markdown")
-        
 # Картинка с тортиком для финала
 IMAGE_URL = "https://i.pinimg.com/736x/52/3b/7a/523b7ab4a5bb49f27b6eed81b32c7b89.jpg"
 
