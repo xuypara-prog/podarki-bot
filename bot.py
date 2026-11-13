@@ -13,12 +13,11 @@ game_lock = threading.Lock()
 IMAGE_URL = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe"
 
 
-# 1. Обработчик команды /start (работает и в личных сообщениях, и в чатах)
-@bot.message_handler(commands=["start"])
+# 1. Обработчик команды /start (работает в ЛИЧНЫХ сообщениях с ботом)
+@bot.message_handler(commands=["start"], chat_types=["private"])
 def send_welcome(message):
   user = message.from_user
 
-  # Красивое упоминание пользователя (если есть юзернейм, то через @, если нет — кликабельное имя)
   if user.username:
     mention = f"@{user.username}"
   else:
@@ -35,7 +34,7 @@ def send_welcome(message):
     bot.send_message(message.chat.id, welcome_text, parse_mode="Markdown")
 
 
-# 2. Обработчик игровой активности в группах (игра «Царь горы»)
+# 2. Обработчик игровой активности в ГРУППАХ (игра «Царь горы»)
 @bot.message_handler(
     func=lambda message: message.chat.type in ["group", "supergroup"],
     content_types=["text", "photo", "sticker", "voice"],
@@ -53,17 +52,14 @@ def handle_chat_activity(message):
     mention = f"[{user.first_name}](tg://user?id={user.id})"
 
   with game_lock:
-    # Если тот же пользователь пишет снова, не сбрасываем его таймер
     if chat_id in active_games and active_games[chat_id]["user_id"] == user.id:
       return
 
-    # Отменяем таймер предыдущего игрока, если он был
     if chat_id in active_games:
       old_game = active_games[chat_id]
       if "timer" in old_game and old_game["timer"]:
         old_game["timer"].cancel()
 
-    # Запускаем новый таймер ровно на 120 секунд (2 минуты)
     timer = threading.Timer(120.0, finish_game, args=(chat_id, user.id))
 
     game_data = {
@@ -75,7 +71,6 @@ def handle_chat_activity(message):
     active_games[chat_id] = game_data
     timer.start()
 
-  # Текст уведомления про тортик со смайликами
   text = (
       f"*{mention}*, ты первый на очереди что бы получить тортик🎂 Осталось"
       f" продерждатся 2 минуты без перебивов!🤯❤️\n\nудачи💕"
@@ -130,4 +125,4 @@ if __name__ == "__main__":
   t.start()
   port = int(os.environ.get("PORT", 5000))
   app.run(host="0.0.0.0", port=port)
-    
+  
